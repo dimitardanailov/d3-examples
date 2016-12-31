@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style type="text/css">
+svg {
+    font-family: "Helvetica Neue", Helvetica;
+}
+circle {
+    shape-rendering: crispEdges;
+    vector-effect: non-scaling-stroke;
+    fill: lightsteelblue;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+}
+circle:hover {
+    fill: red;
+    cursor: pointer;
+}
+circle.active-d3-item {
+    fill: red;
+}
+</style>
+<body>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script>
+var width = 960,
+    height = 500;
+var svg = d3.select('body').append('svg');
+svg.attr('width', width);
+svg.attr('height', height);
+  
+//The data for our lines and endpoints
+var data = [
+  { 'x': 250, 'y': 85 },
+  { 'x': 282, 'y': 88 },
+  { 'x': 311, 'y': 101 },
+  { 'x': 334, 'y': 118 },
+  { 'x': 355, 'y': 145 },
+  { 'x': 367  , 'y': 174 },
+  { 'x': 370  , 'y': 205 },
+  { 'x': 365  , 'y': 236 },
+  { 'x': 353  , 'y': 265 },
+  { 'x': 334  , 'y': 291 },
+  { 'x': 311  , 'y': 308 },
+  { 'x': 282  , 'y': 321 },
+  { 'x': 250  , 'y': 326 },
+  { 'x': 221  , 'y': 321 },
+  { 'x': 221  , 'y': 321 },
+  { 'x': 191  , 'y': 308 },
+  { 'x': 166  , 'y': 291 },
+  { 'x': 147  , 'y': 265 },
+  { 'x': 135  , 'y': 236 },
+  { 'x': 131  , 'y': 205 },
+  { 'x': 135  , 'y': 174 },
+  { 'x': 147  , 'y': 145 },
+  { 'x': 166  , 'y': 118 },
+  { 'x': 190  , 'y': 101 },
+  { 'x': 218  , 'y': 88 }
+];
+// Generating the svg circle attributes
+var attributtes = {
+    'r': 7,
+    'cx': function(d) {
+        return d.x;
+    },
+    'cy': function(d) {
+        return d.y;
+    }
+};
+  
+svg
+  .selectAll('circle')
+      .data(data)
+  .enter()
+      .append('circle')
+          .attr(attributtes);
+</script>

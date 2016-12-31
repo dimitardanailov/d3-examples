@@ -1,4 +1,4 @@
-CTYPE html>
+<!DOCTYPE html>
 <meta charset="utf-8">
 <style type="text/css">
 
@@ -86,7 +86,7 @@ var data = [
   }
 ];
 
-// Generating svg lines attributes
+// Generating the svg lines attributes
 var lineAttributes = {
     'x1': function(d) {
         return d.x1;
@@ -130,7 +130,7 @@ var bottomEndPoints = data.map(function(line, i) {
 
 var endPointsData = topEndPoints.concat(bottomEndPoints);
 
-// Generating svg circle attributes
+// Generating the svg circle attributes
 var endPointsAttributtes = {
     'r': 7,
     'cx': function(d) {
@@ -191,4 +191,3 @@ function dragended() {
     d3.select(this).classed(activeClassName, false);
 }
 </script>
-
