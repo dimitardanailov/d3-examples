@@ -1,0 +1,194 @@
+CTYPE html>
+<meta charset="utf-8">
+<style type="text/css">
+
+svg {
+    font-family: "Helvetica Neue", Helvetica;
+}
+
+line {
+    shape-rendering: crispEdges;
+    vector-effect: non-scaling-stroke;
+
+    stroke: #000;
+    stroke-width: 2px;
+}
+
+circle {
+    shape-rendering: crispEdges;
+    vector-effect: non-scaling-stroke;
+
+    fill: lightsteelblue;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+}
+
+circle:hover {
+    cursor: pointer;
+}
+
+circle.active-d3-item {
+    fill: red;
+}
+  
+circle {
+    shape-rendering: crispEdges;
+    vector-effect: non-scaling-stroke;
+
+    fill: lightsteelblue;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+}
+
+</style>
+<body>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script>
+var width = 960,
+    height = 500,
+    activeClassName = 'active-d3-item';
+
+var svg = d3.select('body').append('svg');
+svg.attr('width', width);
+svg.attr('height', height);
+
+//The data for our lines and endpoints
+var data = [ 
+  {
+    'x1': 350, 
+    'y1': 15,
+    'x2': 250,
+    'y2': 33
+  },  
+  { 
+    'x1': 420,  
+    'y1': 420,
+    'x2': 250,
+    'y2': 333
+  },
+  { 
+    'x1': 140,
+    'y1': 120,
+    'x2': 220,
+    'y2': 220
+  }, 
+  { 
+    'x1': 180,  
+    'y1': 55,
+    'x2': 330,
+    'y2': 320
+  },  
+  { 
+    'x1': 200, 
+    'y1': 260,
+    'x2': 150,
+    'y2': 180
+  }
+];
+
+// Generating svg lines attributes
+var lineAttributes = {
+    'x1': function(d) {
+        return d.x1;
+    },
+    'y1': function(d) {
+        return d.y1;
+    },
+    'x2': function(d) {
+        return d.x2;
+    },
+    'y2': function(d) {
+        return d.y2;
+    }
+};
+
+// Pointer to the d3 lines
+var lines = svg
+  .selectAll('line')
+    .data(data)
+  .enter()
+    .append('line')
+        .attr(lineAttributes);
+
+var topEndPoints = data.map(function(line, i) {
+    return {
+        'x': line.x1,
+        'y': line.y1,
+        'marker': 'marker-start',
+        'lineIndex': i 
+    };
+});
+
+var bottomEndPoints = data.map(function(line, i) {
+    return {
+        'x': line.x2,
+        'y': line.y2,
+        'marker': 'marker-end',
+        'lineIndex': i
+    };
+});
+
+var endPointsData = topEndPoints.concat(bottomEndPoints);
+
+// Generating svg circle attributes
+var endPointsAttributtes = {
+    'r': 7,
+    'cx': function(d) {
+        return d.x;
+    },
+    'cy': function(d) {
+        return d.y;
+    }
+};
+
+var drag = d3.behavior.drag()
+    .origin(function(d) { return d; })
+    .on('dragstart', dragstarted)
+    .on('drag', dragged)
+    .on('dragend', dragended);
+
+// Pointer to d3 circles
+var endPoints = svg
+    .selectAll('circle')
+        .data(endPointsData)
+    .enter()
+        .append('circle')
+            .attr(endPointsAttributtes)
+            .call(drag);
+
+function dragstarted() {
+    d3.select(this).classed(activeClassName, true);
+}
+
+function dragged(d, i) {
+    var marker = d3.select(this);
+
+    // Update the marker properties
+    marker
+        .attr('cx', d.x = d3.event.x)
+        .attr('cy', d.y = d3.event.y);
+
+    // Update the line properties
+    lines
+        .filter(function(lineData, lineIndex) {
+            return lineIndex === d.lineIndex;
+        })
+        .attr('x1', function(lineData) {
+            return d.marker === 'marker-start' ? lineData.x1 = d.x : lineData.x1; 
+        })
+        .attr('y1', function(lineData) {
+            return d.marker === 'marker-start' ? lineData.y1 = d.y : lineData.y1; 
+        })
+        .attr('x2', function(lineData) {
+            return d.marker === 'marker-end' ? lineData.x2 = d.x : lineData.x2; 
+        })
+        .attr('y2', function(lineData) {
+            return d.marker === 'marker-end' ? lineData.y2 = d.y : lineData.y2; 
+        });
+}
+
+function dragended() {
+    d3.select(this).classed(activeClassName, false);
+}
+</script>
+
