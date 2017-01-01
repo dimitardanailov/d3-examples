@@ -1,0 +1,134 @@
+<link rel="import" href="http://polygit.org/components/polymer/polymer.html">
+
+<dom-module id="line-endpoints">
+
+	<template>
+		<style>
+			:host {
+				position: relative;
+
+				display: block;
+			}
+
+			:host line {
+    			shape-rendering: crispEdges;
+    			vector-effect: non-scaling-stroke;
+
+    			stroke: #000;
+    			stroke-width: 2px;
+			}
+		</style>
+
+	</template>
+
+	<script>
+		Polymer({
+
+			is: 'line-endpoints',
+
+			properties: {
+				dimensions: {
+					type: Object,
+					value: {
+						width: 960,
+						height: 500
+					} 
+				},
+
+				svg: {
+					type: Object
+				},
+
+				data: {
+					type: Array
+				}
+			},
+
+			observers: [
+				'dataIsUpdated(data)'
+			],
+
+			ready: function() {
+				this.drawSVG();
+
+				// Get the csv information about the lines coordinates
+				this.getData();
+			},
+
+			/**
+			 * Method is drawing a svg using reference to the current element
+			 */
+			drawSVG: function() {
+				this.svg = d3.select(this)
+					.append('svg')
+						.attr('width', this.dimensions.width)
+						.attr('height', this.dimensions.height);
+
+				this.updateStyles();
+			},
+
+			/**
+             * WARNING:
+             *
+             * If the subtree that you scope contains any Polymer elements with
+             * local DOM, scopeSubtree will cause the descendants'
+             * local DOM to be styled incorrectly.
+             *
+             * @see https://www.polymer-project.org/1.0/docs/devguide/styling
+             */
+			updateStyles: function() {
+				this.scopeSubtree(this, true);
+			},
+
+			getData: function() {
+				var self = this;
+				d3.csv('data.csv', function (error, data) {
+					self.data = data;
+				});
+			},
+
+			/**
+			 * @param {Array} data Each array element has an Object. Object keys are line coordinates (x1, y1, x2, y2)
+			 */
+			dataIsUpdated: function(data) {
+				// Draw svg lines
+				this.drawLines();
+
+				// Draw lines endpoints
+
+			},
+
+			drawLines: function() {
+				var lineAttributes = this.getLineAttributes();
+
+				var lines = this.svg
+				  .selectAll('line')
+				    .data(this.data)
+				  .enter()
+				    .append('line')
+				        .attr(lineAttributes);
+			},
+
+			/**
+			 * Method is generating the svg lines attributes
+			 */
+			getLineAttributes() {
+				return {
+				    'x1': function(d) {
+				        return d.x1;
+				    },
+				    'y1': function(d) {
+				        return d.y1;
+				    },
+				    'x2': function(d) {
+				        return d.x2;
+				    },
+				    'y2': function(d) {
+				        return d.y2;
+				    }
+				};
+			}
+		});
+	</script>
+
+</dom-module>
