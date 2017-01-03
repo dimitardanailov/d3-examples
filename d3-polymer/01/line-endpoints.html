@@ -95,8 +95,9 @@
 				this.drawLines();
 
 				// Draw lines endpoints
-
+				this.drawEndPoints();
 			},
+
 
 			drawLines: function() {
 				var lineAttributes = this.getLineAttributes();
@@ -127,7 +128,35 @@
 				        return d.y2;
 				    }
 				};
-			}
+			},
+
+			drawEndPoints: function() {
+			},
+
+			/**
+			 * @param {Array} data Each array element has an Object. Object keys are line coordinates (x1, y1, x2, y2)
+			 */
+			generateEndPointsData: function() {
+					var topEndPoints = this.data.map(function(line, i) {
+						return {
+							'x': line.x1,
+							'y': line.y1,
+							'marker': 'marker-start',
+							'lineIndex': i 
+						};
+					});
+
+					var bottomEndPoints = this.data.map(function(line, i) {
+						return {
+							'x': line.x2,
+							'y': line.y2,
+							'marker': 'marker-end',
+							'lineIndex': i
+						}
+					});
+
+					return topEndPoints.concat(bottomEndPoints);
+			},
 		});
 	</script>
 
