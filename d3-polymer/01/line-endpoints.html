@@ -11,11 +11,28 @@
 			}
 
 			:host line {
-    			shape-rendering: crispEdges;
-    			vector-effect: non-scaling-stroke;
+				shape-rendering: crispEdges;
+				vector-effect: non-scaling-stroke;
 
-    			stroke: #000;
-    			stroke-width: 2px;
+				stroke: #000;
+				stroke-width: 2px;
+			}
+
+			:host circle {
+				shape-rendering: crispEdges;
+				vector-effect: non-scaling-stroke;
+
+				fill: lightsteelblue;
+				stroke: steelblue;
+				stroke-width: 1.5px;
+			}
+
+			:host circle:hover {
+				cursor: pointer;
+			}
+
+			:host circle.active-d3-item {
+				fill: red;
 			}
 		</style>
 
@@ -48,6 +65,10 @@
 				'dataIsUpdated(data)'
 			],
 
+			getActiveClassName: function() {
+				return 'active-d3-item';
+			},
+
 			ready: function() {
 				this.drawSVG();
 
@@ -68,14 +89,14 @@
 			},
 
 			/**
-             * WARNING:
-             *
-             * If the subtree that you scope contains any Polymer elements with
-             * local DOM, scopeSubtree will cause the descendants'
-             * local DOM to be styled incorrectly.
-             *
-             * @see https://www.polymer-project.org/1.0/docs/devguide/styling
-             */
+				* WARNING:
+				*
+				* If the subtree that you scope contains any Polymer elements with
+				* local DOM, scopeSubtree will cause the descendants'
+				* local DOM to be styled incorrectly.
+				*
+				* @see https://www.polymer-project.org/1.0/docs/devguide/styling
+				*/
 			updateStyles: function() {
 				this.scopeSubtree(this, true);
 			},
@@ -131,10 +152,27 @@
 			},
 
 			drawEndPoints: function() {
+				// Get the end points data 
+				var data = this.generateEndPointsData();
+
+				// Get the end points attributes
+				var attributes = this.getEndPointsAttributes();
+
+				var drag = this.getDragBehavior();
+
+				var circles = this.svg
+				  .selectAll('circle')
+				    .data(data)
+				  .enter()
+				    .append('circle')
+							.attr(attributes)
+							.call(drag);
 			},
 
 			/**
-			 * @param {Array} data Each array element has an Object. Object keys are line coordinates (x1, y1, x2, y2)
+			 * Method is interacting the line items and create: 
+			 * 1. Array with x1 and y1 coordinates
+			 * 2. Array with x2 and y2 coordinates
 			 */
 			generateEndPointsData: function() {
 					var topEndPoints = this.data.map(function(line, i) {
@@ -157,6 +195,68 @@
 
 					return topEndPoints.concat(bottomEndPoints);
 			},
+
+			/**
+			 * Method is generating the svg circles / end points attributes
+			 * 
+			 * @return {Object} keys are r, cx and cy
+			 */
+			getEndPointsAttributes: function() {
+				return {
+					'r': 7,
+					'cx': function(d) {
+						return d.x;
+					},
+					'cy': function(d) {
+						return d.y;
+					}
+				};
+			},
+
+			getDragBehavior: function() {
+				var self = this;
+				var drag = d3.behavior.drag()
+					.origin(function(d) { return d; })
+					.on('dragstart', function() {
+						self.dragstarted(this);
+					})
+					.on('drag', function(d, i) {
+						self.dragged(this, d, i);
+					})
+					.on('dragend', function() {
+						self.dragended(this);
+					});
+
+				return drag;
+			},
+
+			/**
+			 * @param {D3CircleEventObject} item 
+			 */
+			dragstarted: function(item) {
+				d3.select(item).classed(this.getActiveClassName(), true);
+			},
+
+			/**
+			 * @param {D3CircleEventObject} item
+			 * @param {Object} d reference to the backend circle item
+			 * @param {Integer} i circle index
+			 */
+			dragged: function(item, d, i) {
+				var marker = d3.select(item);
+
+				// Update the marker properties
+				marker
+					.attr('cx', d.x = d3.event.x)
+					.attr('cy', d.y = d3.event.y);
+			}, 
+
+			/**
+			 * @param {D3CircleEventObject} item 
+			 */
+			dragended: function(item) {
+				d3.select(item).classed(this.getActiveClassName(), false);
+			}
 		});
 	</script>
 
