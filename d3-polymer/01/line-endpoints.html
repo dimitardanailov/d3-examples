@@ -58,6 +58,10 @@
 
 				data: {
 					type: Array
+				},
+	
+				lines: {
+					type: Object
 				}
 			},
 
@@ -123,7 +127,7 @@
 			drawLines: function() {
 				var lineAttributes = this.getLineAttributes();
 
-				var lines = this.svg
+				this.lines = this.svg
 				  .selectAll('line')
 				    .data(this.data)
 				  .enter()
@@ -249,6 +253,24 @@
 				marker
 					.attr('cx', d.x = d3.event.x)
 					.attr('cy', d.y = d3.event.y);
+
+				// Update the line properties
+				this.lines
+					.filter(function(lineData, lineIndex) {
+						return lineIndex === d.lineIndex;
+					})
+					.attr('x1', function(lineData) {
+						return d.marker === 'marker-start' ? lineData.x1 = d.x : lineData.x1;
+					})
+					.attr('y1', function(lineData) {
+            return d.marker === 'marker-start' ? lineData.y1 = d.y : lineData.y1; 
+					})
+					.attr('x2', function(lineData) {
+							return d.marker === 'marker-end' ? lineData.x2 = d.x : lineData.x2; 
+					})
+					.attr('y2', function(lineData) {
+							return d.marker === 'marker-end' ? lineData.y2 = d.y : lineData.y2; 
+					});
 			}, 
 
 			/**
