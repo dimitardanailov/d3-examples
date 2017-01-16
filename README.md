@@ -7,6 +7,7 @@ List with data-driven document via [d3js](https://d3js.org/)
  - [Circles](https://bl.ocks.org/dimitardanailov/24d5d5303c24810bf0f4ba9f5b69d4f4)
  - [Moving a line via d3.behavior.drag](https://bl.ocks.org/dimitardanailov/99950eee511375b97de749b597147d19)
  - [Moving a circle via d3.behavior.drag](https://bl.ocks.org/dimitardanailov/49f07bea0ed8adc92daee2162ac87c6c)
+ - [Moving the line via transparent endpoints](https://bl.ocks.org/dimitardanailov/c94959170383fb5082dd5fdea06dd1bb)
 
 ### Polymer and D3js
  - [Moving the line via endpoints](https://bl.ocks.org/dimitardanailov/556ff8797ba3f8a38fb8b9f79752ddff)
