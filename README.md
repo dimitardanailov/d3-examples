@@ -9,3 +9,4 @@ List with data-driven document via [d3js](https://d3js.org/)
  - [Moving a circle via d3.behavior.drag](https://bl.ocks.org/dimitardanailov/49f07bea0ed8adc92daee2162ac87c6c)
 
 ### Polymer and D3js
+ - [Moving the line via endpoints](https://bl.ocks.org/dimitardanailov/556ff8797ba3f8a38fb8b9f79752ddff)
