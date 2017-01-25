@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style type="text/css">
+
+svg {
+    font-family: "Helvetica Neue", Helvetica;
+}
+
+.curve, 
+.line {
+	fill: none;
+	stroke-width: 1px;
+}
+
+.curve {
+	stroke: red;
+	stroke-width: 3px;
+}
+
+.control { 
+	fill: #ccc;
+	stroke: #000;
+	stroke-width: 5px;
+}
+
+.time,
+.controltext {
+	font-size: .6em;
+}
+
+</style>
+<body>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script>
+var width = 250,
+		height = 300,
+		t = .5,
+		delta = .01,
+		padding = 10,
+		bezier = {},
+		n = 4;
+
+var line = d3.svg.line()
+	.x(function(d) {
+		return d.x;
+	})
+	.y(function(d) {
+		return d.y;
+	});
+
+var orders = d3.range(2, n + 2);
+var beziers = d3.select('body')
+	.selectAll('svg')
+		.data(orders)
+	.enter()
+		.append('svg')
+			.attr('width', width + 2 * padding)
+			.attr('height', height + 2 * padding)
+		.append('g')
+			.attr('transform', 'translate(' + padding + ',' + padding + ')');
+
+// attributes for each bezier circle
+var circlesAttributes = {
+    'r': 7,
+		'class': 'control',
+    'cx': function(d) {
+        return d.x;
+    },
+    'cy': function(d) {
+        return d.y;
+    }
+};
+
+
+// attributes for each bezier circle text item
+var textControlsAttributes = {
+	'class': 'controltext',
+	'dx': '10px',
+	'dy': '.4em'
+};
+
+var points = [
+	{ x: 10, y: 250 },
+	{ x: 0, y: 0 },
+	{ x: 100, y: 0 },
+	{ x: 200, y: 250 },
+	{ x: 225, y: 125 }
+];
+
+update();
+
+// circles
+beziers
+	.selectAll('circle.control')
+		.data(function(d) { 
+			return points.slice(0, d);
+		})
+	.enter()
+		.append('circle')
+			.attr(circlesAttributes);
+
+// Text items
+beziers.append('text')
+	.attr('class', 'time')
+	.attr('x', width / 2)
+	.attr('y', height / 2)
+	.attr('text-anchor', 'middle');
+beziers
+	.selectAll('text.controltext')
+		.data(function(d) { return points.slice(0, d); })
+	.enter()
+		.append('text')
+			.attr(textControlsAttributes)
+			.text(function(d, i) { return 'P' + i } );
+
+// Timer
+var last = 0;
+d3.timer(function(elapsed) {
+	t = (t + (elapsed - last) / 5000) % 1;
+	last = elapsed;
+	update();
+
+	// d3.timer.stop();
+});
+
+function update() {
+	var interpolation = beziers
+			.selectAll('g')
+				.data(function(d) { 
+					return getLevels(d, t);
+				});
+
+	interpolation
+		.enter()
+			.append('g')
+				.style('fill', colour)
+				.style('stroke', colour);
+
+	// drawBezierCircles(interpolation);
+	drawBezierPaths(interpolation);
+	// drawBezierCurves();
+
+	// Text items
+	beziers.selectAll('text.controltext')
+		.attr('x', function(d) {
+			return d.x;
+		})
+		.attr('y', function(d) {
+			return d.y;
+		});
+
+	beziers.selectAll('text.time')
+		.text('t=' + t.toFixed(2));
+}
+
+function getLevels(d, time) {
+	if (arguments.length < 2) time = t;
+
+	var coordinates = [points.slice(0, d)];
+	var tempPoints;
+	for (var i = 1; i < d; i++) {
+		tempPoints = coordinates[coordinates.length - 1];
+		coordinates.push(interpolate(tempPoints, time));
+	}
+
+	return coordinates;
+}
+
+function interpolate(_points, time) {
+	if (arguments.length < 2) time = t;
+
+	var tempPoints = [], startingPoint, endPoint, point;
+	for (var i = 1; i < _points.length; i++) {
+		startingPoint = _points[i - 1];
+		endPoint = _points[i];
+
+		point = {
+			x: startingPoint.x + (endPoint.x - endPoint.x) * time,
+			y: startingPoint.y + (endPoint.y - endPoint.y) * time
+		};
+
+		tempPoints.push(point);
+	}
+
+	return tempPoints;
+}
+
+
+function getCurve(d) {
+	var curve = bezier[d];
+
+	if (!curve) {
+		curve = bezier[d] = [];
+
+		var coordinates, item;
+		for (var i = 0; i <= 1; i+=delta) {
+			coordinates = getLevels(d, i);
+			item = coordinates[coordinates.length - 1];
+			curve.push(item[0]);
+		}
+	}
+
+	var response = [curve.slice(0, t / delta + 1)];
+
+	return response;
+}
+
+function colour(d, i) {
+	// Constructs a new ordinal scale with a range of twenty categorical colors:
+	// https://github.com/d3/d3-3.x-api-reference/blob/master/Ordinal-Scales.md#category20b
+	var stroke = d3.scale.category20b();
+	stroke(-i);
+
+	return d.length > 1 ? stroke(i) : 'red';
+}
+
+function drawBezierCircles(interpolation) {
+	var attributes = {
+			'r': 4,
+			'cx': function(d) {
+					return d.x;
+			},
+			'cy': function(d) {
+					return d.y;
+			}
+	};
+
+	// Add a collection with temp circles
+	// These circles will illustrate the Bézier curve
+	interpolation
+		.selectAll('circle')
+			.data(Object)
+		.enter()
+			.append('circle')
+				.attr(attributes);
+}
+
+function drawBezierPaths(interpolation) {
+	interpolation
+		.selectAll('path')
+			.data(function(d) { 
+				console.log(d);
+
+				return [d];
+			})
+		.enter()
+			.append('path')
+				.attr('class', 'line')
+				.attr('d', line);
+}
+
+function drawBezierCurves() {
+	beziers
+		.selectAll('path.curve')
+			.data(getCurve)
+		.enter()
+			.append('path')
+				.attr('class', 'line')
+				.attr('d', line);
+}
+
+</script>
